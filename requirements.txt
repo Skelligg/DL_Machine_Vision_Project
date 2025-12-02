@@ -1,1 +1,21 @@
 kagglehub
+# Core ML libraries
+torch==2.2.0
+torchvision==0.18.1
+torchaudio==2.2.0
+
+# Notebook and visualization
+jupyterlab==4.2.2
+matplotlib==3.8.1
+seaborn==0.12.2
+numpy==1.26.1
+pandas==2.1.0
+
+# Logging / monitoring
+tensorboard==2.15.0
+
+# Optional: for Kaggle API or downloading datasets
+kaggle==1.5.16
+
+# Optional: for progress bars
+tqdm==4.66.0
