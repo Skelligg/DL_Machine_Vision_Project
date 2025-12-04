@@ -48,9 +48,7 @@
 
 **Data Augmentation (training set only):**
 
-* Random horizontal flip
-* Random rotation ±15°
-* Optional: random crops/padding or brightness/contrast jitter
+* It does not seem necessary for this dataset.
 
 **Justification:** These preprocessing steps ensure compatibility with pretrained networks while augmentation improves generalization and prevents overfitting.
 
