@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Classifier</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover {
+            border-color: #4a90d9;
+            background: #f8fafc;
+        }
+        .upload-area.dragover {
+            border-color: #4a90d9;
+            background: #e8f4fd;
+        }
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        #file-input {
+            display: none;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: none;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 217, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            display: none;
+        }
+        .prediction {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .prediction-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .prediction-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .confidence {
+            font-size: 18px;
+            color: #4a90d9;
+        }
+        .probabilities {
+            margin-top: 20px;
+        }
+        .prob-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .prob-label {
+            width: 100px;
+            font-size: 12px;
+            color: #666;
+        }
+        .prob-bar-container {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .prob-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90d9, #357abd);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .prob-value {
+            width: 50px;
+            font-size: 12px;
+            color: #333;
+            text-align: right;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a90d9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fashion Classifier</h1>
+        <p class="subtitle">Upload an image to identify the clothing item (90.65% accuracy)</p>
+
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📷</div>
+            <p>Click or drag an image here</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <img id="preview" alt="Preview">
+
+        <button id="classify-btn" disabled>Classify Image</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing image...</p>
+        </div>
+
+        <div id="result">
+            <div class="prediction">
+                <div class="prediction-label">This looks like a</div>
+                <div class="prediction-value" id="prediction-text"></div>
+                <div class="confidence" id="confidence-text"></div>
+            </div>
+            <div class="probabilities" id="probabilities"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const preview = document.getElementById('preview');
+        const classifyBtn = document.getElementById('classify-btn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        let selectedFile = null;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                classifyBtn.disabled = false;
+                result.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        classifyBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            classifyBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                document.getElementById('prediction-text').textContent = data.prediction;
+                document.getElementById('confidence-text').textContent = `Confidence: ${data.confidence}`;
+
+                const probsContainer = document.getElementById('probabilities');
+                probsContainer.innerHTML = '';
+
+                const probs = Object.entries(data.all_probabilities).slice(0, 5);
+                probs.forEach(([label, prob]) => {
+                    const item = document.createElement('div');
+                    item.className = 'prob-item';
+                    item.innerHTML = `
+                        <span class="prob-label">${label}</span>
+                        <div class="prob-bar-container">
+                            <div class="prob-bar" style="width: ${prob}%"></div>
+                        </div>
+                        <span class="prob-value">${prob}%</span>
+                    `;
+                    probsContainer.appendChild(item);
+                });
+
+                result.style.display = 'block';
+            } catch (error) {
+                alert('Error classifying image. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+                classifyBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+services:
+  fashion-classifier:
+    build: .
+    ports:
+      - "80:8000"
+    restart: unless-stopped
