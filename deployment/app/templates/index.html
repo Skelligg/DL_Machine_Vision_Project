@@ -44,13 +44,8 @@
             border-radius: 12px;
             padding: 40px 20px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.3s, background 0.3s;
             margin-bottom: 20px;
-        }
-        .upload-area:hover {
-            border-color: #4a90d9;
-            background: #f8fafc;
         }
         .upload-area.dragover {
             border-color: #4a90d9;
@@ -59,9 +54,6 @@
         .upload-icon {
             font-size: 48px;
             margin-bottom: 10px;
-        }
-        #file-input {
-            display: none;
         }
         #preview {
             max-width: 100%;
@@ -177,8 +169,7 @@
 
         <div class="upload-area" id="upload-area">
             <div class="upload-icon">📷</div>
-            <p>Click or drag an image here</p>
-            <input type="file" id="file-input" accept="image/*">
+            <p>Drag and drop an image here</p>
         </div>
 
         <img id="preview" alt="Preview">
@@ -202,15 +193,12 @@
 
     <script>
         const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
         const preview = document.getElementById('preview');
         const classifyBtn = document.getElementById('classify-btn');
         const loading = document.getElementById('loading');
         const result = document.getElementById('result');
 
         let selectedFile = null;
-
-        uploadArea.addEventListener('click', () => fileInput.click());
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -229,15 +217,14 @@
             }
         });
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFile(e.target.files[0]);
-            }
-        });
-
         function handleFile(file) {
             if (!file.type.startsWith('image/')) {
                 alert('Please upload an image file');
+                return;
+            }
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('File too large. Please upload an image smaller than 10MB');
                 return;
             }
             selectedFile = file;
