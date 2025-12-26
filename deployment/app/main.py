@@ -7,12 +7,21 @@ from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from torchvision import transforms
 
 from app.model import FashionCNN, CLASS_NAMES
 
 app = FastAPI(title="Fashion Classifier", description="Upload an image to classify clothing items")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # OK for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))

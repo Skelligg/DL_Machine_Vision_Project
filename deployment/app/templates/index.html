@@ -249,7 +249,7 @@
             formData.append('file', selectedFile);
 
             try {
-                const response = await fetch('/predict', {
+                const response = await fetch('http://localhost/predict', {
                     method: 'POST',
                     body: formData
                 });
