@@ -42,15 +42,16 @@
 
 **Preprocessing Steps:**
 
-1. Convert grayscale 28x28 images to RGB.
-2. Resize images to 224x224 for compatibility with pretrained models.
-3. Normalize using ImageNet mean `[0.485, 0.456, 0.406]` and std `[0.229, 0.224, 0.225]`.
+1. Search for any duplicates that may cause leakage into validation set.
+2. Convert grayscale 28x28 images to RGB.
+3. Resize images to 224x224 for compatibility with pretrained models.
+4. Normalize using ImageNet mean `[0.485, 0.456, 0.406]` and std `[0.229, 0.224, 0.225]`.
 
 **Data Augmentation (training set only):**
 
-* It does not seem necessary for this dataset.
+* It does not seem necessary for this dataset as we have a sufficient amount of images and variety.
 
-**Justification:** These preprocessing steps ensure compatibility with pretrained networks while augmentation improves generalization and prevents overfitting.
+**Justification:** These preprocessing steps ensure compatibility with pretrained networks.
 
 ---
 
@@ -60,7 +61,6 @@
 2. **Hyperparameter Tuning:**
 
    * Learning rates: 0.001, 0.0005, 0.0001
-   * Batch sizes: 32, 64, 128
 3. **Scratch CNN:** 3–4 convolutional layers + pooling + fully connected layers.
 4. **Epochs:** 5–15 for meaningful comparisons.
 5. **Logging:** TensorBoard for metrics and checkpoints.
@@ -82,11 +82,11 @@
 
 ## Notebook Outline
 
-1. Introduction & Plan (this section)
-2. Data Exploration & Preprocessing
-3. Baseline Pretrained Model
-4. Hyperparameter Experiments
-5. Scratch CNN
-6. Grad-CAM & Error Analysis
-7. Final Comparison Between Models
-8. Conclusions & Future Work
+0. Introduction & Plan (this section)
+1. Data Exploration & Preprocessing
+2. Baseline Pretrained Model
+3. Hyperparameter Experiments
+4. Scratch CNN
+5. Grad-CAM & Error Analysis
+6. Final Comparison Between Models
+7. Conclusions & Future Work
